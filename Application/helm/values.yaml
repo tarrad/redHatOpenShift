@@ -2,8 +2,8 @@ ReplicaNumber: 3
 
 containers:
   containerPort: 8080
-  image: 'quay.io/tzach112/openshiftws:v2'
-  tag: 'base'
+  image: 'quay.io/tzach112/openshiftws'
+  tag: 'chart_v1'
 
 service:
   servicePort: 8080
