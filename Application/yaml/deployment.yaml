@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
 # Set your lab user name
-        app:user1-hello-world
+        app: user1-hello-world
     spec:
       containers:
         - resources: {}
