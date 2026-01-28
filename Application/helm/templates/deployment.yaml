@@ -18,18 +18,41 @@ spec:
             name: '{{ .Chart.Name }}-html'
             defaultMode: 420
       containers:
-        - resources: {}
-          terminationMessagePath: /dev/termination-log
-          name: {{ .Chart.Name }}
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.containers.image }}:{{ .Values.containers.tag }}
+          imagePullPolicy: Always
+          env:
+            - name: PORT
+              value: {{ .Values.containers.containerPort | quote }}
           ports:
             - containerPort: {{ .Values.containers.containerPort }}
               protocol: TCP
-          imagePullPolicy: Always
+          resources: {}
+          readinessProbe:
+            httpGet:
+              path: /health/readiness # checks the application readiness URL path
+              port: {{ .Values.containers.containerPort }} # port the application is listening on
+              scheme: HTTP
+            initialDelaySeconds: 1 # time to wait before first readiness check
+            timeoutSeconds: 1 # readiness probe timeout
+            periodSeconds: 10 # time between readiness checks
+            successThreshold: 1 # required consecutive successes
+            failureThreshold: 3 # consecutive failures before marking as unhealthy
+          livenessProbe:
+            httpGet:
+              path: /health/liveliness # checks the application liveness URL path
+              port: {{ .Values.containers.containerPort }} # port the application is listening on
+              scheme: HTTP
+            initialDelaySeconds: 1 # time to wait before first liveness check
+            timeoutSeconds: 1 # liveness probe timeout
+            periodSeconds: 10 # time between liveness checks
+            successThreshold: 1 # required consecutive successes
+            failureThreshold: 3 # consecutive failures before restart
+          terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-          image: {{ .Values.containers.image }}:{{ .Values.containers.tag }}
           volumeMounts:
-          - name: index-html
-            mountPath: /tmp/html # this will mount the html.index file to it application location
+            - name: index-html
+              mountPath: /tmp/html # mounts the html.index file to its application location
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
   strategy:
